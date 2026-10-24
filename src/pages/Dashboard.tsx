@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { useSubscriptionStore } from '../store/useSubscriptionStore';
+import { useApiKeyStore } from '../store/useApiKeyStore';
 import { Card, CardBody } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Skeleton } from '../components/ui/Skeleton';
 import { formatCurrency, monthlyCost, daysUntil, statusColor, typeColor } from '../lib/utils';
-import { DollarSign, CreditCard, Gift, CalendarClock, TrendingUp } from 'lucide-react';
+import { DollarSign, CreditCard, Gift, CalendarClock, TrendingUp, KeyRound } from 'lucide-react';
 
 function MetricCard({ title, value, sub, icon, accent }: { title: string; value: string; sub?: string; icon: React.ReactNode; accent: string }) {
   return (
@@ -23,7 +24,8 @@ function MetricCard({ title, value, sub, icon, accent }: { title: string; value:
 
 export function Dashboard() {
   const { subscriptions, activity, loading, fetchAll } = useSubscriptionStore();
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  const { keys, fetchAll: fetchKeys } = useApiKeyStore();
+  useEffect(() => { fetchAll(); fetchKeys(); }, [fetchAll, fetchKeys]);
 
   const activePaid = subscriptions.filter((s) => s.status === 'active' && s.type === 'paid');
   const freeServices = subscriptions.filter((s) => s.type === 'free' || s.type === 'lifetime');
@@ -56,11 +58,12 @@ export function Dashboard() {
         <p className="text-sm text-slate-400 mt-1">Your subscription overview at a glance.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard title="Monthly Spend" value={formatCurrency(monthlySpend)} sub="Active paid subscriptions" icon={<DollarSign size={20} className="text-white" />} accent="bg-indigo-600" />
         <MetricCard title="Annual Spend" value={formatCurrency(annualSpend)} sub="Projected yearly" icon={<TrendingUp size={20} className="text-white" />} accent="bg-violet-600" />
         <MetricCard title="Active Paid" value={String(activePaid.length)} sub="Paying services" icon={<CreditCard size={20} className="text-white" />} accent="bg-emerald-600" />
         <MetricCard title="Free / Lifetime" value={String(freeServices.length)} sub="No recurring cost" icon={<Gift size={20} className="text-white" />} accent="bg-teal-600" />
+        <MetricCard title="Active API Keys" value={String(keys.filter((k) => k.status === 'active').length)} sub={`${keys.length} total`} icon={<KeyRound size={20} className="text-white" />} accent="bg-amber-600" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

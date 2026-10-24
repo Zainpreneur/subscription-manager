@@ -5,6 +5,7 @@ import { Subscriptions } from './pages/Subscriptions';
 import { SubscriptionDetail } from './pages/SubscriptionDetail';
 import { CalendarPage } from './pages/Calendar';
 import { Analytics } from './pages/Analytics';
+import { ApiKeysPage } from './pages/ApiKeys';
 import { SettingsPage } from './pages/Settings';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/subscriptions/:id" element={<SubscriptionDetail />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/api-keys" element={<ApiKeysPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
