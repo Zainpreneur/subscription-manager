@@ -6,6 +6,8 @@ import { SubscriptionDetail } from './pages/SubscriptionDetail';
 import { CalendarPage } from './pages/Calendar';
 import { Analytics } from './pages/Analytics';
 import { ApiKeysPage } from './pages/ApiKeys';
+import { BudgetsPage } from './pages/Budgets';
+import { AlertsPage } from './pages/Alerts';
 import { SettingsPage } from './pages/Settings';
 
 export default function App() {
@@ -18,6 +20,8 @@ export default function App() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/api-keys" element={<ApiKeysPage />} />
+        <Route path="/budgets" element={<BudgetsPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

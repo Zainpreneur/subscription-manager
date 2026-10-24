@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSubscriptionStore } from '../store/useSubscriptionStore';
 import { Card } from '../components/ui/Card';
 import { formatCurrency } from '../lib/utils';
+import { downloadICS } from '../lib/calendarSync';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isToday } from 'date-fns';
 
@@ -35,9 +36,14 @@ export function CalendarPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Renewal Calendar</h1>
-        <p className="text-sm text-slate-400 mt-1">Track upcoming renewal dates.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Renewal Calendar</h1>
+          <p className="text-sm text-slate-400 mt-1">Track upcoming renewal dates.</p>
+        </div>
+        <button onClick={() => downloadICS(store.subscriptions.filter((s) => s.status === 'active'))} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition">
+          Sync to Calendar (.ics)
+        </button>
       </div>
 
       <Card className="p-4">

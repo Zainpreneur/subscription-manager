@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useSubscriptionStore } from '../store/useSubscriptionStore';
 import { Card, CardHeader, CardBody } from '../components/ui/Card';
 import { DonutChart } from '../components/ui/DonutChart';
@@ -34,18 +34,16 @@ export function Analytics() {
   const topVendors = Object.entries(byVendor).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
   // mock monthly trend (last 6 months) derived
-  const trend = useMemo(() => {
-    // oxlint-disable-next-line react/purity
-    const trendBase = new Date();
-    return Array.from({ length: 6 }).map((_, i) => {
-      const month = new Date(trendBase);
-      month.setMonth(month.getMonth() - (5 - i));
-      const label = month.toLocaleString('default', { month: 'short' });
-      const base = totalMonthly;
-      const factor = 0.85 + i * 0.03 + (i % 2 ? 0.02 : 0);
-      return { label, value: Math.round(base * factor * 100) / 100 };
-    });
-  }, [totalMonthly]);
+  // oxlint-disable-next-line react/purity
+  const trendBase = new Date();
+  const trend = Array.from({ length: 6 }).map((_, i) => {
+    const month = new Date(trendBase);
+    month.setMonth(month.getMonth() - (5 - i));
+    const label = month.toLocaleString('default', { month: 'short' });
+    const base = totalMonthly;
+    const factor = 0.85 + i * 0.03 + (i % 2 ? 0.02 : 0);
+    return { label, value: Math.round(base * factor * 100) / 100 };
+  });
 
   const maxTrend = Math.max(...trend.map((t) => t.value), 1);
 

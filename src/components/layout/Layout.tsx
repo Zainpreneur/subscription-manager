@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar, MobileSidebar } from './Sidebar';
 import { Header } from './Header';
 import { ToastContainer } from '../ui/Toast';
 import { CommandPalette } from '../ui/CommandPalette';
+import { runAutomations } from '../../lib/automation';
 
 export function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem('automations_ran')) return;
+    sessionStorage.setItem('automations_ran', '1');
+    runAutomations().catch(() => {});
+  }, []);
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100">

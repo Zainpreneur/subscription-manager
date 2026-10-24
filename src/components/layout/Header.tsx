@@ -29,7 +29,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-700 bg-slate-900/80 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         />
       </form>
-      <button className="relative p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+      <button onClick={() => navigate('/alerts')} className="relative p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
         <Bell size={18} />
         <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500" />
       </button>
