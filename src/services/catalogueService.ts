@@ -10,6 +10,8 @@ let items: CatalogueItem[] = load();
 export const catalogueService = {
   async list(){ await delay(); return [...items]; },
   async get(id:string){ await delay(80); return items.find(i=>i.id===id)??null; },
+  async create(input: Omit<CatalogueItem,'id'>){ await delay(); const c: CatalogueItem = { id:'cat_'+Math.random().toString(36).slice(2,8), ...input }; items=[c,...items]; save(items); return c; },
   async update(id:string, patch:Partial<CatalogueItem>){ await delay(); const idx=items.findIndex(i=>i.id===id); if(idx===-1) throw new Error('Not found'); const u={...items[idx],...patch}; items=items.map(i=>i.id===id?u:i); save(items); return u; },
+  async remove(id:string){ await delay(); items=items.filter(i=>i.id!==id); save(items); },
   async reset(){ items=[...mockCatalogue]; save(items); },
 };

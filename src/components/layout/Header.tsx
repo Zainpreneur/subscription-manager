@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Bell, User } from 'lucide-react';
 import { useSubscriptionStore } from '../../store/useSubscriptionStore';
+import { useAlertStore } from '../../store/useAlertStore';
 import { Button } from '../ui/Button';
 
 export function Header({ onMenu }: { onMenu: () => void }) {
   const [q, setQ] = useState('');
   const navigate = useNavigate();
   const setFilter = useSubscriptionStore((s) => s.setFilter);
+  const alerts = useAlertStore((s) => s.alerts);
+  const fetchAlerts = useAlertStore((s) => s.fetchAll);
+  useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
+  const unread = alerts.filter((a) => !a.read).length;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +36,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
       </form>
       <button onClick={() => navigate('/alerts')} className="relative p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
         <Bell size={18} />
-        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500" />
+        {unread > 0 && <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center">{unread > 9 ? '9+' : unread}</span>}
       </button>
       <button className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-200 hover:bg-slate-600">
         <User size={16} />

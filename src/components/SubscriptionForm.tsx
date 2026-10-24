@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CATEGORIES, PAYMENT_METHODS } from '../services/mockData';
+import { CATEGORIES } from '../services/mockData';
 import { Input, Select, Textarea } from './ui/Field';
 import { Button } from './ui/Button';
 import type { Subscription, SubscriptionType, SubscriptionStatus, BillingCycle } from '../types/subscription';
+import { useCatalogueStore } from '../store/useCatalogueStore';
+import { usePaymentStore } from '../store/usePaymentStore';
+import { Many2OneField } from '../components/fields/Many2OneField';
 
 type FormValues = Omit<Subscription, 'id' | 'createdAt' | 'updatedAt' | 'costHistory' | 'invoices'>;
 
@@ -27,7 +30,7 @@ const empty: FormValues = {
 
 interface Props {
   initial?: Subscription;
-  onSubmit: (values: FormValues) => void | Promise<void>;
+  onSubmit: (values: FormValues & { catalogueItemId?: string; planId?: string }) => void | Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 }
@@ -37,6 +40,11 @@ export function SubscriptionForm({ initial, onSubmit, onCancel, loading }: Props
   const [tagsInput, setTagsInput] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const catalogue = useCatalogueStore();
+  const payStore = usePaymentStore();
+  const [catalogueItemId, setCatalogueItemId] = useState<string>('');
+  const [planId, setPlanId] = useState<string>('');
+  useEffect(() => { catalogue.fetchAll(); payStore.fetchAll(); }, []);
 
   useEffect(() => {
     if (initial) {
@@ -54,6 +62,7 @@ export function SubscriptionForm({ initial, onSubmit, onCancel, loading }: Props
         autoRenew: initial.autoRenew,
         cancellationReminderDate: initial.cancellationReminderDate || '',
         paymentMethod: initial.paymentMethod,
+        paymentMethodId: initial.paymentMethodId,
         notes: initial.notes,
         tags: initial.tags,
         logo: initial.logo || '',
@@ -63,6 +72,25 @@ export function SubscriptionForm({ initial, onSubmit, onCancel, loading }: Props
   }, [initial]);
 
   const set = (patch: Partial<FormValues>) => setValues((v) => ({ ...v, ...patch }));
+
+  const selectedCatalogue = catalogue.items.find((c) => c.id === catalogueItemId);
+  const selectedPlan = selectedCatalogue?.plans.find((p) => p.id === planId);
+
+  useEffect(() => {
+    if (!selectedCatalogue || !selectedPlan) return;
+    setValues((v) => ({
+      ...v,
+      name: selectedCatalogue.name + (selectedPlan.name !== 'Free' ? ` - ${selectedPlan.name}` : ''),
+      vendor: selectedCatalogue.vendor,
+      category: selectedCatalogue.category,
+      type: selectedPlan.type === 'free' ? 'free' : selectedPlan.type === 'trial' ? 'trial' : 'paid',
+      cost: selectedPlan.price,
+      billingCycle: (selectedPlan.billingCycle === 'free' ? 'monthly' : selectedPlan.billingCycle) as BillingCycle,
+      notes: selectedCatalogue.description,
+      logo: selectedCatalogue.logo,
+    }));
+    setTagsInput(selectedCatalogue.tags.join(', '));
+  }, [catalogueItemId, planId]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -79,11 +107,28 @@ export function SubscriptionForm({ initial, onSubmit, onCancel, loading }: Props
     e.preventDefault();
     if (!validate()) return;
     const tags = tagsInput.split(',').map((t) => t.trim()).filter(Boolean);
-    onSubmit({ ...values, tags });
+    onSubmit({ ...values, tags, catalogueItemId: catalogueItemId || undefined, planId: planId || undefined });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-slate-400 mb-1 block">Prefill from catalogue (optional)</label>
+          <Select value={catalogueItemId} onChange={(e) => { setCatalogueItemId(e.target.value); setPlanId(''); }}>
+            <option value="">— Manual entry —</option>
+            {catalogue.items.map((c) => <option key={c.id} value={c.id}>{c.logo} {c.name}</option>)}
+          </Select>
+        </div>
+        <div>
+          <label className="text-xs text-slate-400 mb-1 block">Plan</label>
+          <Select value={planId} onChange={(e) => setPlanId(e.target.value)} disabled={!selectedCatalogue}>
+            <option value="">— Select plan —</option>
+            {selectedCatalogue?.plans.map((p) => <option key={p.id} value={p.id}>{p.name} — {p.price === 0 ? 'Free' : `$${p.price}/${p.billingCycle}`}</option>)}
+          </Select>
+        </div>
+      </div>
+      {selectedPlan && <p className="text-[11px] text-slate-500 -mt-2">Fields below auto-populated from the selected plan; edit freely.</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-xs text-slate-400 mb-1 block">Name</label>
@@ -144,12 +189,17 @@ export function SubscriptionForm({ initial, onSubmit, onCancel, loading }: Props
           <label className="text-xs text-slate-400 mb-1 block">Renewal Date</label>
           <Input type="date" value={values.renewalDate} onChange={(e) => set({ renewalDate: e.target.value })} />
         </div>
-        <div>
-          <label className="text-xs text-slate-400 mb-1 block">Payment Method</label>
-          <Select value={values.paymentMethod} onChange={(e) => set({ paymentMethod: e.target.value })}>
-            {PAYMENT_METHODS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </Select>
-        </div>
+        <Many2OneField
+          label="Payment Method (m2o)"
+          value={values.paymentMethodId || ''}
+          onChange={(id) => {
+            const m = payStore.methods.find((x) => x.id === id);
+            set({ paymentMethodId: id || undefined, paymentMethod: m ? m.label : values.paymentMethod });
+          }}
+          options={payStore.methods.map((m) => ({ id: m.id, label: m.label, subtitle: m.last4 ? `•••• ${m.last4}` : undefined }))}
+          placeholder="— Select payment method —"
+          help="Linked to Settings → Payment Methods"
+        />
         <div>
           <label className="text-xs text-slate-400 mb-1 block">Cancellation Reminder</label>
           <Input type="date" value={values.cancellationReminderDate || ''} onChange={(e) => set({ cancellationReminderDate: e.target.value })} />

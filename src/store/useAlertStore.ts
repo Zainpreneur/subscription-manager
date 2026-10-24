@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Alert } from '../types/budget';
+import type { Alert } from '../types/alert';
 import { alertService } from '../services/alertService';
 
 interface State {

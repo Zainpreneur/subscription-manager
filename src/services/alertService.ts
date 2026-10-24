@@ -1,4 +1,4 @@
-import type { Alert } from '../types/budget';
+import type { Alert } from '../types/alert';
 
 const KEY = 'submgr_alerts_v1';
 const delay = (ms=120) => new Promise(r=>setTimeout(r,ms));

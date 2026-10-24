@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSubscriptionStore } from '../store/useSubscriptionStore';
+import { useCatalogueStore } from '../store/useCatalogueStore';
 import { useToastStore } from '../store/useToastStore';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -17,6 +18,7 @@ const CATEGORIES = ['all', 'AI Tools', 'Cloud Infrastructure', 'Productivity', '
 
 export function Subscriptions() {
   const store = useSubscriptionStore();
+  const catalogueStore = useCatalogueStore();
   const toast = useToastStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -24,7 +26,7 @@ export function Subscriptions() {
   const [deleting, setDeleting] = useState<Subscription | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => { store.fetchAll(); }, []);
+  useEffect(() => { store.fetchAll(); catalogueStore.fetchAll(); }, []);
   useEffect(() => {
     if (searchParams.get('add') === '1') {
       setEditing(null);
@@ -49,11 +51,15 @@ export function Subscriptions() {
   const openEdit = (s: Subscription) => { setEditing(s); setModalOpen(true); };
 
   const handleSubmit = async (values: any) => {
+    const { catalogueItemId, planId, ...clean } = values;
     if (editing) {
-      await store.update(editing.id, values);
+      await store.update(editing.id, clean);
       toast.show('Subscription updated', 'success');
     } else {
-      await store.add(values);
+      const created = await store.add(clean);
+      if (catalogueItemId && planId) {
+        await catalogueStore.linkPlan(catalogueItemId, planId, [created.id]);
+      }
       toast.show('Subscription added', 'success');
     }
     setModalOpen(false);

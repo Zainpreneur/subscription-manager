@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Check, Trash2, Mail } from 'lucide-react';
-import type { Alert } from '../types/budget';
+import type { Alert } from '../types/alert';
 
 const sevColor = (s: Alert['severity']) => {
   switch (s) {

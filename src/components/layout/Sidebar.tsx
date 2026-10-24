@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Calendar, BarChart3, Settings as SettingsIcon, KeyRound, Wallet, Bell, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Package, Calendar, BarChart3, Settings as SettingsIcon, KeyRound, Bell, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const nav = [
@@ -9,7 +9,6 @@ const nav = [
   { to: '/analytics', label: 'Analytics & Spend', icon: BarChart3 },
   { to: '/catalogue', label: 'Software Catalogue', icon: BookOpen },
   { to: '/api-keys', label: 'API Keys', icon: KeyRound },
-  { to: '/budgets', label: 'Budgets', icon: Wallet },
   { to: '/alerts', label: 'Alerts', icon: Bell },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ];

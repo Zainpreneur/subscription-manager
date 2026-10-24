@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSubscriptionStore } from '../store/useSubscriptionStore';
+import { useApiKeyStore } from '../store/useApiKeyStore';
+import { useCatalogueStore } from '../store/useCatalogueStore';
+import { usePaymentStore } from '../store/usePaymentStore';
 import { useToastStore } from '../store/useToastStore';
 import { Card, CardHeader, CardBody } from '../components/ui/Card';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -8,15 +11,19 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Field';
 import { Modal } from '../components/ui/Modal';
+import { One2ManyField } from '../components/fields/One2ManyField';
 import { SubscriptionForm } from '../components/SubscriptionForm';
 import { formatCurrency, monthlyCost, annualCost, daysUntil, formatDate, statusColor, typeColor } from '../lib/utils';
-import { ArrowLeft, Pencil, Trash2, Calendar, CreditCard, FileText, TrendingUp, Bell } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Calendar, CreditCard, FileText, TrendingUp, Bell, KeyRound, BookOpen } from 'lucide-react';
 import type { Subscription } from '../types/subscription';
 
 export function SubscriptionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const store = useSubscriptionStore();
+  const keyStore = useApiKeyStore();
+  const catalogueStore = useCatalogueStore();
+  const paymentStore = usePaymentStore();
   const toast = useToastStore();
   const [sub, setSub] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,6 +38,9 @@ export function SubscriptionDetail() {
       const s = await (await import('../services/subscriptionService')).subscriptionService.get(id);
       setSub(s);
       setLoading(false);
+      keyStore.fetchAll();
+      catalogueStore.fetchAll();
+      paymentStore.fetchAll();
     })();
   }, [id]);
 
@@ -134,7 +144,8 @@ export function SubscriptionDetail() {
         <Card>
           <CardHeader><h2 className="font-semibold text-white flex items-center gap-2"><CreditCard size={16} className="text-indigo-400" /> Payment Method</h2></CardHeader>
           <CardBody className="space-y-3">
-            <Row label="Method" value={sub.paymentMethod} />
+            <Row label="Method" value={paymentStore.methods.find((m) => m.id === sub.paymentMethodId)?.label || sub.paymentMethod} />
+            {sub.paymentMethodId && <Row label="Payment Method (m2o)" value={paymentStore.methods.find((m) => m.id === sub.paymentMethodId)?.last4 ? `•••• ${paymentStore.methods.find((m) => m.id === sub.paymentMethodId)?.last4}` : '—'} />}
             <Row label="Currency" value={sub.currency} />
             <Row label="Notes" value={sub.notes || '—'} />
             <Row label="Tags" value={sub.tags.length ? sub.tags.join(', ') : '—'} />
@@ -188,6 +199,53 @@ export function SubscriptionDetail() {
           </CardBody>
         </Card>
       </div>
+
+      {(() => {
+        const linked = catalogueStore.items.filter((c) => c.linkedSubscriptionIds?.includes(sub.id));
+        if (linked.length === 0) return null;
+        return (
+          <Card>
+            <CardHeader><h2 className="font-semibold text-white flex items-center gap-2"><BookOpen size={16} className="text-indigo-400" /> Linked Catalogue (m2m)</h2></CardHeader>
+            <CardBody>
+              <div className="space-y-2">
+                {linked.map((c) => {
+                  const plan = c.plans.find((p) => p.id === c.subscribedPlanId);
+                  return (
+                    <div key={c.id} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{c.logo}</span>
+                        <div>
+                          <p className="text-sm text-white">{c.name}</p>
+                          <p className="text-xs text-slate-500">{c.vendor}{plan ? ` · ${plan.name}` : ''}</p>
+                        </div>
+                      </div>
+                      <a href={`/catalogue`} className="text-xs text-indigo-400 hover:text-indigo-300">View</a>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardBody>
+          </Card>
+        );
+      })()}
+
+      <Card>
+        <CardHeader><h2 className="font-semibold text-white flex items-center gap-2"><KeyRound size={16} className="text-indigo-400" /> Linked API Keys (o2m)</h2></CardHeader>
+        <CardBody>
+          <One2ManyField
+            label="API keys for this subscription"
+            items={keyStore.keys.filter((k) => k.subscriptionId === sub.id)}
+            columns={[
+              { key: 'name', label: 'Name' },
+              { key: 'environment', label: 'Env' },
+              { key: 'status', label: 'Status', render: (r) => <Badge className={r.status === 'active' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/15 text-slate-400 border-slate-500/30'}>{r.status}</Badge> },
+              { key: 'masked', label: 'Key' },
+            ]}
+            onAdd={() => window.location.assign('/api-keys')}
+            emptyText="No API keys linked. Add one in API Keys page."
+          />
+        </CardBody>
+      </Card>
 
       <Card>
         <CardHeader><h2 className="font-semibold text-white flex items-center gap-2"><Bell size={16} className="text-indigo-400" /> Cancellation Reminder</h2></CardHeader>

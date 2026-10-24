@@ -31,6 +31,7 @@ export interface Subscription {
   autoRenew: boolean;
   cancellationReminderDate?: string;
   paymentMethod: string;
+  paymentMethodId?: string; // m2o: subscription → payment method
   notes: string;
   tags: string[];
   logo?: string; // emoji or url

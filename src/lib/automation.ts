@@ -28,7 +28,5 @@ export async function runAutomations() {
     }
   }
 
-  // Budget evaluation
-  const { useBudgetStore } = await import('../store/useBudgetStore');
-  await useBudgetStore.getState().fetchAll();
+
 }

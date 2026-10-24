@@ -20,5 +20,5 @@ export interface CatalogueItem {
   tags: string[];
   plans: CataloguePlan[];
   subscribedPlanId?: string; // linked plan if you have a subscription
-  linkedSubscriptionId?: string;
+  linkedSubscriptionIds?: string[]; // m2m: catalogue item ↔ subscriptions
 }

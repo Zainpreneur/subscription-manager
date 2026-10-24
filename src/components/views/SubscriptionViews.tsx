@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { formatCurrency, daysUntil, statusColor, typeColor } from '../../lib/utils';
 import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
@@ -11,10 +12,11 @@ interface ViewProps {
 }
 
 export function CardView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {items.map((s) => (
-        <Card key={s.id} className="p-5 hover:border-slate-700 transition group">
+        <Card key={s.id} className="p-5 hover:border-slate-700 transition group cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center text-xl">{s.logo || '📦'}</div>
@@ -23,7 +25,7 @@ export function CardView({ items, onEdit, onDelete }: ViewProps) {
                 <p className="text-xs text-slate-500 truncate">{s.vendor}</p>
               </div>
             </div>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
               <button onClick={() => onEdit(s)} className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800"><Pencil size={14} /></button>
               <button onClick={() => onDelete(s)} className="p-1.5 text-slate-400 hover:text-rose-400 rounded hover:bg-slate-800"><Trash2 size={14} /></button>
             </div>
@@ -50,11 +52,12 @@ export function CardView({ items, onEdit, onDelete }: ViewProps) {
 }
 
 export function ListView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   return (
     <Card className="overflow-hidden">
       <div className="divide-y divide-slate-800">
         {items.map((s) => (
-          <div key={s.id} className="px-4 py-3 flex items-center gap-4 hover:bg-slate-800/40 transition">
+          <div key={s.id} className="px-4 py-3 flex items-center gap-4 hover:bg-slate-800/40 transition cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
             <div className="h-9 w-9 rounded-lg bg-slate-800 flex items-center justify-center text-lg flex-shrink-0">{s.logo || '📦'}</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -71,7 +74,7 @@ export function ListView({ items, onEdit, onDelete }: ViewProps) {
               <p className="text-sm font-medium text-white">{formatCurrency(s.cost)}<span className="text-xs text-slate-500">/{s.billingCycle}</span></p>
               <p className="text-xs text-slate-500">Renews {s.renewalDate}</p>
             </div>
-            <div className="flex gap-1 flex-shrink-0">
+            <div className="flex gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               <button onClick={() => onEdit(s)} className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800"><Pencil size={14} /></button>
               <button onClick={() => onDelete(s)} className="p-1.5 text-slate-400 hover:text-rose-400 rounded hover:bg-slate-800"><Trash2 size={14} /></button>
             </div>
@@ -84,6 +87,7 @@ export function ListView({ items, onEdit, onDelete }: ViewProps) {
 }
 
 export function TableView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
@@ -102,7 +106,7 @@ export function TableView({ items, onEdit, onDelete }: ViewProps) {
           </thead>
           <tbody className="divide-y divide-slate-800">
             {items.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-800/40">
+              <tr key={s.id} className="hover:bg-slate-800/40 cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{s.logo || '📦'}</span>
@@ -119,7 +123,7 @@ export function TableView({ items, onEdit, onDelete }: ViewProps) {
                 <td className="px-4 py-3 text-slate-300">{s.billingCycle}</td>
                 <td className="px-4 py-3 text-slate-300">{s.renewalDate}</td>
                 <td className="px-4 py-3 text-right">
-                  <div className="inline-flex gap-1">
+                  <div className="inline-flex gap-1" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onEdit(s)} className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800"><Pencil size={14} /></button>
                     <button onClick={() => onDelete(s)} className="p-1.5 text-slate-400 hover:text-rose-400 rounded hover:bg-slate-800"><Trash2 size={14} /></button>
                   </div>
@@ -135,10 +139,11 @@ export function TableView({ items, onEdit, onDelete }: ViewProps) {
 }
 
 export function GalleryView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {items.map((s) => (
-        <div key={s.id} className="group relative rounded-xl overflow-hidden border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 hover:border-indigo-500/50 transition">
+        <div key={s.id} className="group relative rounded-xl overflow-hidden border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 hover:border-indigo-500/50 transition cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
           <div className="aspect-square flex flex-col items-center justify-center p-4">
             <div className="text-5xl mb-3">{s.logo || '📦'}</div>
             <p className="text-sm font-semibold text-white text-center truncate w-full">{s.name}</p>
@@ -148,7 +153,7 @@ export function GalleryView({ items, onEdit, onDelete }: ViewProps) {
               <Badge className={statusColor(s.status)}>{s.status}</Badge>
             </div>
           </div>
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => onEdit(s)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"><Pencil size={16} /></button>
             <button onClick={() => onDelete(s)} className="p-2 rounded-full bg-rose-600/80 hover:bg-rose-600 text-white"><Trash2 size={16} /></button>
           </div>
@@ -160,6 +165,7 @@ export function GalleryView({ items, onEdit, onDelete }: ViewProps) {
 }
 
 export function KanbanView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   const columns = [
     { key: 'active', label: 'Active', color: 'border-emerald-500/40' },
     { key: 'paused', label: 'Paused', color: 'border-amber-500/40' },
@@ -177,7 +183,7 @@ export function KanbanView({ items, onEdit, onDelete }: ViewProps) {
             </div>
             <div className="space-y-2">
               {colItems.map((s) => (
-                <div key={s.id} className="rounded-lg border border-slate-800 bg-slate-900 p-3 hover:border-slate-700 transition group">
+                <div key={s.id} className="rounded-lg border border-slate-800 bg-slate-900 p-3 hover:border-slate-700 transition group cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{s.logo || '📦'}</span>
                     <div className="min-w-0 flex-1">
@@ -187,7 +193,7 @@ export function KanbanView({ items, onEdit, onDelete }: ViewProps) {
                   </div>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-sm text-indigo-300 font-medium">{formatCurrency(s.cost)}<span className="text-xs text-slate-500">/{s.billingCycle}</span></span>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => onEdit(s)} className="p-1 text-slate-400 hover:text-white"><Pencil size={12} /></button>
                       <button onClick={() => onDelete(s)} className="p-1 text-slate-400 hover:text-rose-400"><Trash2 size={12} /></button>
                     </div>
@@ -205,6 +211,7 @@ export function KanbanView({ items, onEdit, onDelete }: ViewProps) {
 }
 
 export function TimelineView({ items, onEdit, onDelete }: ViewProps) {
+  const navigate = useNavigate();
   const sorted = [...items].sort((a, b) => new Date(a.renewalDate).getTime() - new Date(b.renewalDate).getTime());
   return (
     <div className="relative pl-6">
@@ -213,7 +220,7 @@ export function TimelineView({ items, onEdit, onDelete }: ViewProps) {
         {sorted.map((s) => (
           <div key={s.id} className="relative">
             <div className="absolute -left-6 top-3 h-3 w-3 rounded-full bg-indigo-500 border-2 border-slate-950" />
-            <Card className="p-4 hover:border-slate-700 transition group">
+            <Card className="p-4 hover:border-slate-700 transition group cursor-pointer" onClick={() => navigate(`/subscriptions/${s.id}`)}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="h-9 w-9 rounded-lg bg-slate-800 flex items-center justify-center text-lg flex-shrink-0">{s.logo || '📦'}</div>
@@ -227,7 +234,7 @@ export function TimelineView({ items, onEdit, onDelete }: ViewProps) {
                     <p className="text-sm font-medium text-white">{formatCurrency(s.cost)}<span className="text-xs text-slate-500">/{s.billingCycle}</span></p>
                     <p className="text-xs text-slate-400">{s.renewalDate} ({daysUntil(s.renewalDate) >= 0 ? `in ${daysUntil(s.renewalDate)}d` : 'past due'})</p>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onEdit(s)} className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800"><Pencil size={14} /></button>
                     <button onClick={() => onDelete(s)} className="p-1.5 text-slate-400 hover:text-rose-400 rounded hover:bg-slate-800"><Trash2 size={14} /></button>
                   </div>

@@ -5,6 +5,7 @@ import { useToastStore } from '../store/useToastStore';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input, Select, Textarea } from '../components/ui/Field';
+import { Many2OneField } from '../components/fields/Many2OneField';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -299,12 +300,7 @@ function ApiKeyForm({ initial, onSubmit, onCancel, loading, subscriptions }: { i
         </div>
         <div><label className="text-xs text-slate-400 mb-1 block">Expires At</label><Input type="date" value={values.expiresAt} onChange={(e) => set({ expiresAt: e.target.value })} /></div>
         <div><label className="text-xs text-slate-400 mb-1 block">Rate Limit</label><Input value={values.rateLimit} onChange={(e) => set({ rateLimit: e.target.value })} placeholder="1000 req/min" /></div>
-        <div><label className="text-xs text-slate-400 mb-1 block">Linked Subscription</label>
-          <Select value={values.subscriptionId} onChange={(e) => set({ subscriptionId: e.target.value })}>
-            <option value="">— None —</option>
-            {subscriptions.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </Select>
-        </div>
+        <Many2OneField label="Linked Subscription" value={values.subscriptionId} onChange={(v) => set({ subscriptionId: v })} options={subscriptions.map((s: any) => ({ id: s.id, label: s.name, subtitle: s.vendor }))} placeholder="— None —" help="m2o: api_key.subscription_id → subscription" />
       </div>
       <div><label className="text-xs text-slate-400 mb-1 block">API Key</label><Input value={values.key} onChange={(e) => set({ key: e.target.value })} required placeholder="sk-..." /></div>
       <div><label className="text-xs text-slate-400 mb-1 block">Scopes (comma separated)</label><Input value={values.scopes} onChange={(e) => set({ scopes: e.target.value })} placeholder="read, write" /></div>
